@@ -1,0 +1,74 @@
+public class page_register extends AppCompatActivity {
+    EditText account,username,password;
+    Button active_click;
+    TextView error;
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_page_register);
+        account = findViewById(R.id.insert_account);
+        username = findViewById(R.id.insert_username);
+        password = findViewById(R.id.insert_password);
+        active_click = findViewById(R.id.insert_active);
+        error = findViewById(R.id.text_error);
+
+
+
+
+        active_click.setOnClickListener(new View.OnClickListener() {
+
+
+            @Override
+            public void onClick(View v) {
+                String rec = "";
+
+                if(account.getText().toString().trim().length()>0&& username.getText().toString().trim().length()>0&& password.getText().toString().trim().length()>0) {
+                    new Async().execute();
+                }
+                else {
+                    error.setText(null);
+                    if (account.getText().toString().trim().length() == 0) {
+                        rec += "帳號不能留空\n";
+                    }
+                    if (username.getText().toString().trim().length() == 0) {
+                        rec +="使用者名稱不能留空\n";
+                    }
+                    if (password.getText().toString().trim().length() == 0) {
+                        rec +="密碼不能留空\n";
+                    }
+                    error.setText(rec);
+                }
+            }
+        });
+    }
+    class Async extends AsyncTask<Void, Void, Void>{
+        Statement stmt = null;
+        String err = "";
+        @Override
+        protected Void doInBackground(Void... voids) {
+            try {
+
+                Class.forName("com.mysql.jdbc.Driver");
+                Connection connection = DriverManager.getConnection("jdbc:mysql://140.136.151.171/item", "andro", "androiddata");
+                stmt = connection.createStatement();
+                String sql = "INSERT INTO `account`(`accountid`, `password`,`username`) VALUES('" + account.getText().toString()+ "','"    +password.getText().toString()+"','"+username.getText().toString()+"')";
+                stmt.executeUpdate(sql);
+            }
+            catch (Exception e)
+            {
+                err=e.toString();
+            }
+            return null;
+
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            Intent intent = new Intent();
+            intent.setClass(page_register.this,MainActivity.class);
+            startActivity(intent);
+            Toast.makeText(page_register.this, "註冊成功", Toast.LENGTH_SHORT).show();
+        }
+    }
+}
